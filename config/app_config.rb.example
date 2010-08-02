@@ -1,0 +1,35 @@
+
+CONFIG = {}
+
+CONFIG[:production] = {
+  :locale                        => :en,
+  :scrape_enabled                => true,
+  :announce_interval_seconds     => 1800,
+  :announce_min_interval_seconds => 1800,
+  :announce_resp_max_peers       => 50,
+  :ban_unknown_clients           => true,
+  :log_announces                 => true,
+  :bonus_rules                   => { :seeding => 0.5 }
+}
+
+CONFIG[:development] = {
+  :locale                        => :en,
+  :scrape_enabled                => true,
+  :announce_interval_seconds     => 1800,
+  :announce_min_interval_seconds => 1800,
+  :announce_resp_max_peers       => 50,
+  :ban_unknown_clients           => true,
+  :log_announces                 => true,
+  :bonus_rules                   => { :seeding => 0.5 }
+}
+
+CONFIG[:test] = {
+  :locale                        => :en,
+  :scrape_enabled                => true,
+  :announce_interval_seconds     => 1800,
+  :announce_min_interval_seconds => 1800,
+  :announce_resp_max_peers       => 50,
+  :ban_unknown_clients           => true,
+  :log_announces                 => true,
+  :bonus_rules                   => { :seeding => 0.5 }
+}

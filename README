@@ -1,0 +1,42 @@
+
+Private bittorrent tracker application. It is built with the Ruby language
+and the Sinatra framework and is supposed to be used along with its parent 
+app: http://github.com/cores/mukif.
+
+- licence: see doc/MIT_LICENCE
+
+- components:
+  + framework: sinatra
+  + orm: activerecord
+  + test: rspec
+
+- run in development:
+  $ git clone http://github.com/cores/mukift.git
+  $ cd mukift  
+  $ bundle install  
+  $ rake app_custom_files:generate
+  + setup development database using Mukif project
+  + set your database settings in 'config/database.rb'
+  $ ruby mukift.rb -p 4000 -e development  
+  
+- run the tests
+  + setup test database using Mukif project
+  $ spec spec -c -f n
+    
+- deploy to a remote server: see 'deploy/README'
+
+- custom files
+  - app_root
+    - config
+      + database.rb         + database connection config
+      + app_config.rb       + app config
+      + messages.rb         + tracker messages
+    - deploy    
+      + deploy.rb           + capistrano recipes for deployment
+      + install.rb          + sprinkle recipes for installing server software
+      + prepare.rb          + capistrano recipes for pre-deployment preparation
+
+- note
+  + the bittorrent related implementations are based in the specification found at: 
+    http://wiki.theory.org/BitTorrentSpecification
+

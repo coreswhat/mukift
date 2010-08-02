@@ -1,0 +1,40 @@
+
+ActiveRecord::Base.configurations[:development] = {
+  :adapter   => 'mysql',
+  :encoding  => 'utf8',
+  :reconnect =>  true,
+  :database  => 'mukif_development',
+  :pool      =>  5,
+  :username  => 'root',
+  :password  => '',
+  :host      => 'localhost',
+  :socket    => '/var/run/mysqld/mysqld.sock'
+}
+
+ActiveRecord::Base.configurations[:production] = {
+  :adapter   => 'mysql',
+  :encoding  => 'utf8',
+  :reconnect =>  true,
+  :database  => 'mukif_production',
+  :pool      =>  5,
+  :username  => 'root',
+  :password  => '',
+  :host      => 'localhost',
+  :socket    => '/var/run/mysqld/mysqld.sock'
+}
+
+ActiveRecord::Base.configurations[:test] = {
+  :adapter   => 'mysql',
+  :encoding  => 'utf8',
+  :reconnect =>  true,
+  :database  => 'mukif_test',
+  :pool      =>  5,
+  :username  => 'root',
+  :password  => '',
+  :host      => 'localhost',
+  :socket    => '/var/run/mysqld/mysqld.sock'
+}
+
+ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations[MUKIFT_ENV])
+
+ActiveRecord::Base::logger = LOGGER

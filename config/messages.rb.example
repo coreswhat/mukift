@@ -1,0 +1,24 @@
+  
+MESSAGES = {}
+
+# en
+
+  MESSAGES[:en] = {} 
+
+  MESSAGES[:en][:announce] = {
+    :invalid_torrent       => 'Torrent not found.',
+    :invalid_passkey       => 'Invalid passkey.',
+    :client_banned         => 'Client not allowed.',
+    :client_version_banned => 'Client version not allowed.',
+    :invalid_request       => 'Client sent request with invalid data.',
+    :server_error          => 'Unexpected server error.'
+  }
+
+  MESSAGES[:en][:scrape] = {
+    :not_allowed        => 'Tracker does not allow scrape.',
+    :invalid_torrent    => 'Torrent not found.',
+    :invalid_passkey    => 'Invalid passkey.', 
+    :invalid_request    => 'Client sent request with invalid data.',
+    :server_error       => 'Unexpected server error.'
+  }
+  

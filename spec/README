@@ -1,0 +1,21 @@
+
+# running the tests
+  + check Mukif project on how to setup test database        
+  + run
+    $ spec spec -c -f n
+    $ spec spec/bittorrent -c -f n
+    $ spec spec/models -c -f n
+    $ spec spec/models/user_spec.rb -c -f n
+    $ spec spec/tracker -c -f n
+
+# spec dir structure:
+
+  - app_root
+    - spec  
+      - bittorrent          - bittorrent module spec tests
+      - models              - models spec tests      
+      - support             
+        + makers.rb           + methods that create records
+        + misc.rb             + methods used by the specs
+      - tracker             - tracker module spec tests
+      + spec_helper.rb      + rspec config file

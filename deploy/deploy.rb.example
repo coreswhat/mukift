@@ -1,0 +1,195 @@
+
+# Capistrano recipe for deployment, in this case the user do not
+# need to act as sudo.
+#
+# Important: if you are deploying the code from your LOCAL machine
+# repository to the server, ALWAYS commit your changes or they won't
+# be deployed.
+#
+# It is also possible to deploy from a remote git repository to the server:
+#   + switch the comments in the 'repository' and 'deploy strategy' sections
+#   + set the repository url
+#   + install git in the server (enable it in 'deploy/install.rb')
+#
+# - first deploy:
+#   $ cap deploy:cold
+#
+# - setup deploy dir structure:
+#   $ cap deploy:setup
+#
+# - new release:
+#   $ cap deploy
+#
+# - config:
+#   + set config files
+#     $ cap deploy:config
+#
+#   + set a particular config file
+#     $ cap deploy:config:set_file file=config.yml
+#
+# - restart app:
+#   $ cap deploy:restart 
+#
+# - cleanup old releases
+#   $ cap deploy:cleanup
+
+set :application, 'mukift'
+
+# server  
+
+  set :domain, 'localhost'
+  set :port, 22
+
+# roles
+
+  role :app, domain
+  role :web, domain
+  role :db,  domain, :primary => true
+
+# user
+
+  set :user, application
+
+  Capistrano::CLI.ui.say('Please provide the app user password:')
+  Capistrano::CLI.ui.say(" > username: #{user}")
+  set :password, Capistrano::CLI.password_prompt(' > password: ')
+
+  set :use_sudo, false
+
+# scm
+
+  set :scm, :git
+  default_run_options[:pty] = true
+
+# repository
+
+  set :branch, 'master'
+  # remote
+    # set :repository, 'git://github.com/user/repo.git'
+  # local
+    set :repository, '.'
+
+# cleanup 
+
+  set :keep_releases, 2
+
+# deploy strategy
+
+  # remote repository
+    # set :deploy_via, :remote_cache
+    # set :repository_cache, 'git_cache'
+  # local repository
+    set :deploy_via, :copy
+    
+    excluded =  ['.git/*', '.gitignore', '.project/*', 'Capfile', 'README']
+    excluded += ['deploy/*', 'log/*', 'spec/*'] 
+    excluded += ['config/config.*', 'config/database.*', 'config/messages.*']
+    set :copy_exclude, excluded
+
+# deploy
+
+  set :deploy_to, "/var/vhosts/#{application}"
+  
+  set :shared_config_path, "#{shared_path}/system/config"
+   
+  set :release_config_path, "#{release_path}/config"
+
+  namespace :deploy do
+    
+    task :cold do
+      setup
+      config.set_dirs
+      config.set_config_files
+      update
+      start
+    end
+    
+    task :start, :roles => :app do
+      restart
+    end
+
+    task :stop, :roles => :app do
+      # nothing
+    end
+
+    task :restart, :roles => :app, :except => { :no_release => true } do
+      run "touch #{current_path}/tmp/restart.txt"
+    end
+                
+    after 'deploy:update_code' do
+      config.symlinks # create the symlinks for the config files in the new release config dir
+      bundler.bundle_new_release
+    end
+
+    namespace :bundler do
+      
+      task :bundle_new_release, :roles => :app do
+        bundler.create_symlink
+        run "cd #{current_release} && bundle install --without development test deploy"
+      end
+      
+      task :create_symlink, :roles => :app do
+        shared_dir = File.join(shared_path, 'bundle')
+        release_dir = File.join(current_release, '.bundle')
+        run "mkdir -p #{shared_dir} && ln -s #{shared_dir} #{release_dir}"
+      end
+      
+      task :lock, :roles => :app do
+        run "cd #{current_release} && bundle lock;"
+      end
+      
+      task :unlock, :roles => :app do
+        run "cd #{current_release} && bundle unlock;"
+      end
+    end
+
+    # Tasks that upload and replace the application's config files so they can remain
+    # stored in the 'shared/system' directory through deployments.
+    namespace :config do
+      set :local_config_path, 'config'
+      
+      set :config_files, ['app_config.rb', 'database.rb', 'messages.rb']
+
+      desc 'Set config dirs and files and restart app.'
+      task :default, :roles => :app do
+        set_dirs
+        set_config_files
+        restart
+      end
+
+      desc 'Create config dirs.'
+      task :set_dirs, :roles => :app do
+        run "mkdir -p #{shared_config_path}"
+      end
+
+      desc 'Set config files.'
+      task :set_config_files, :roles => :app do
+        config_files.each do |f|
+          run "rm -f #{shared_config_path}/#{f}"
+          top.upload "#{local_config_path}/#{f}", "#{shared_config_path}/#{f}"
+        end
+      end
+
+      desc 'Set a particular config file.'
+      task :set_file, :roles => :app do        
+        f = ENV['file']
+        raise 'the given file does not appear to be a config file' unless config_files.include?(f)
+        run "rm -f #{shared_config_path}/#{f}"
+        top.upload "#{local_config_path}/#{f}", "#{shared_config_path}/#{f}"
+      end
+
+      desc 'Set config files symlinks for the newest release.'
+      task :symlinks, :roles => :app do
+        run "mkdir -p #{release_config_path}"
+        # config files        
+        config_files.each {|f| run "ln -s #{shared_config_path}/#{f} #{release_config_path}/#{f}" }
+      end
+    end
+  end
+
+
+
+
+
+
+

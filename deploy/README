@@ -1,0 +1,80 @@
+
+This dir contains recipes for installing all the required software in 
+the server (sprinkle + passenger-stack) and for deploying the app (capistrano).
+
+# dir structure:
+
+  - deploy
+    - stack             - contain the sprinkle installation packages
+    - templates         - contain templates for generated files
+      + mukift.erb        + the app passenger config file when not deployed as sub uri
+    + deploy.rb         + capistrano tasks for deployment
+    + install.rb        + sprinkle recipe to install a passenger stack in the server
+    + prepare.rb        + capistrano tasks to prepare the server for deployment
+
+# deploying
+
+  - all commands are called in the app root dir of your local machine, unless when specified
+
+  # deploying as a sub uri of Mukif app
+    - it assumes that you already deployed Mukif app using the original recipes  
+
+    - local code repository
+      + similar to Mukif app
+
+    - first deploy
+      
+      - prepare (create app user and app dir)
+        $ cap -f deploy/prepare.rb prepare_server:for_sub_uri
+    
+      - database setup (this step has to be done manually)
+        + log in on your server via ssh
+          $ ssh -l <user> -p 22 localhost
+        + log in on mysql
+          $ mysql -u root -p
+        + create database user for the app
+          mysql> GRANT ALL PRIVILEGES ON mukif_production.* TO 'user_username_here'@localhost IDENTIFIED BY 'user_password_here';
+        + add the username and password to your local file 'config/database.rb' (production entry)
+    
+      - deploy (upload config files and code and restart)
+        + be certain that all the config files are prepared
+        $ cap deploy:cold
+    
+      - now the app should be running, test with http://localhost/tracker/nonono/announce
+
+    - deploying a new release  
+      + commit your changes
+      $ cap deploy
+
+    - changing the config files
+    
+      - replace the config files in the server with your local ones
+        $ cap deploy:config
+  
+      - replace a particular config file in the server with your local one
+        $ cap deploy:config:set_file file=config_file.yml
+  
+      - note that the local config files are uploaded directly from your local machine to the 
+        server without using git, so no need to commit when they change
+      
+    - restarting app
+      $ cap deploy:restart
+
+  # deploying in a separate uri
+    - steps are the same as deploying as sub uri, with the exception of:
+    
+      - install server software if needed
+        $ sprinkle -v -c -s deploy/install.rb          
+      
+      - prepare (creates app user, app dir and passenger app config)
+        $ cap -f deploy/prepare.rb prepare_server         
+     
+# references:
+
+  + http://github.com/crafterm/sprinkle/tree/master
+  + http://github.com/benschwarz/passenger-stack/tree/master
+  + http://wiki.capify.org/index.php/Main_Page
+
+
+
+

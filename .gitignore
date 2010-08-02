@@ -1,0 +1,13 @@
+
+config/app_config.rb
+config/database.rb
+config/messages.rb
+
+log/*.log
+
+deploy/deploy.rb
+deploy/prepare.rb
+
+.project
+
+.bundle
